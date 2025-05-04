@@ -4,25 +4,32 @@ services:
     name: dashboard-frontend
     env: docker
     plan: free
-    dockerfilePath: ./Dockerfile.frontend
-    dockerContext: .
+    region: ohio
+    healthCheckPath: /
     envVars:
       - key: NODE_ENV
         value: production
-    healthCheckPath: /
-    numInstances: 1
+    dockerCommand: nginx -g 'daemon off;'
+    disk:
+      name: tmp
+      mountPath: /tmp
+      sizeGB: 1
+    autoDeploy: true
 
   # Backend Service
   - type: web
     name: dashboard-backend
     env: docker
     plan: free
-    dockerfilePath: ./Dockerfile
-    dockerContext: .
+    region: ohio
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: "3001"
-    healthCheckPath: /health
-    numInstances: 1
+    disk:
+      name: tmp
+      mountPath: /tmp
+      sizeGB: 1
+    autoDeploy: true
