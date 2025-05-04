@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    environment: RENDER_API_KEY
 
     steps:
       - name: Checkout code
@@ -35,8 +36,17 @@ jobs:
               "type": "web",
               "name": "dashboard-backend",
               "env": "docker",
+              "region": "ohio",
+              "plan": "free",
+              "envVars": [
+                {
+                  "key": "NODE_ENV",
+                  "value": "production"
+                }
+              ],
               "dockerfilePath": "./Dockerfile",
-              "branch": "main"
+              "branch": "main",
+              "rootDir": "."
             }')
 
           BACKEND_HTTP_CODE=$(echo "$BACKEND_RESPONSE" | tail -n1)
@@ -56,8 +66,17 @@ jobs:
               "type": "web",
               "name": "dashboard-frontend",
               "env": "docker",
+              "region": "ohio",
+              "plan": "free",
+              "envVars": [
+                {
+                  "key": "NODE_ENV",
+                  "value": "production"
+                }
+              ],
               "dockerfilePath": "./Dockerfile.frontend",
-              "branch": "main"
+              "branch": "main",
+              "rootDir": "."
             }')
 
           FRONTEND_HTTP_CODE=$(echo "$FRONTEND_RESPONSE" | tail -n1)
