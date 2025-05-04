@@ -2,6 +2,13 @@
 
 A full-stack application featuring a real-time dashboard that displays data through multiple communication methods (WebSocket and REST API).
 
+## Live Demo Links
+
+- Frontend: [https://dashboard-frontend-latest-a2vg.onrender.com/](https://dashboard-frontend-latest-a2vg.onrender.com/)
+- Backend: [https://dashboard-backend-latest.onrender.com](https://dashboard-backend-latest.onrender.com)
+
+> **Note**: While the Docker setup and Render deployment are working fine, the CI/CD automation is currently in progress. Manual deployments are being used temporarily.
+
 ## Features
 
 ### Frontend (React.js)
