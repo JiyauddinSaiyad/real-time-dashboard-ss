@@ -17,17 +17,18 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
+      - name: Build Docker images
         run: |
           docker build -t dashboard-backend -f Dockerfile .
           docker build -t dashboard-frontend -f Dockerfile.frontend .
 
-      - name: Deploy to Render
+      - name: Deploy to Render and verify
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
         run: |
-          # Deploy backend service
-          curl -X POST https://api.render.com/v1/services \
+          # Deploy backend service and capture response
+          echo "Deploying backend service..."
+          BACKEND_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.render.com/v1/services \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
@@ -36,10 +37,19 @@ jobs:
               "env": "docker",
               "dockerfilePath": "./Dockerfile",
               "branch": "main"
-            }'
+            }')
 
-          # Deploy frontend service
-          curl -X POST https://api.render.com/v1/services \
+          BACKEND_HTTP_CODE=$(echo "$BACKEND_RESPONSE" | tail -n1)
+          if [ "$BACKEND_HTTP_CODE" -ne 200 ] && [ "$BACKEND_HTTP_CODE" -ne 201 ]; then
+            echo "Backend deployment failed with status: $BACKEND_HTTP_CODE"
+            echo "Response: $BACKEND_RESPONSE"
+            exit 1
+          fi
+          echo "Backend deployment initiated successfully"
+
+          # Deploy frontend service and capture response
+          echo "Deploying frontend service..."
+          FRONTEND_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST https://api.render.com/v1/services \
             -H "Authorization: Bearer $RENDER_API_KEY" \
             -H "Content-Type: application/json" \
             -d '{
@@ -48,4 +58,14 @@ jobs:
               "env": "docker",
               "dockerfilePath": "./Dockerfile.frontend",
               "branch": "main"
-            }'
+            }')
+
+          FRONTEND_HTTP_CODE=$(echo "$FRONTEND_RESPONSE" | tail -n1)
+          if [ "$FRONTEND_HTTP_CODE" -ne 200 ] && [ "$FRONTEND_HTTP_CODE" -ne 201 ]; then
+            echo "Frontend deployment failed with status: $FRONTEND_HTTP_CODE"
+            echo "Response: $FRONTEND_RESPONSE"
+            exit 1
+          fi
+          echo "Frontend deployment initiated successfully"
+
+          echo "Both services deployed successfully. Check Render dashboard for deployment status."
