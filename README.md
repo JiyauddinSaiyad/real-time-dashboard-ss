@@ -64,7 +64,7 @@ A full-stack application featuring a real-time dashboard that displays data thro
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/JiyauddinSaiyad/real-time-dashboard.git
+   git clone https://github.com/JiyauddinSaiyad/real-time-dashboard-ss.git
    cd real-time-dashboard
    ```
 
