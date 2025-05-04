@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: dashboard-frontend:latest
+    container_name: dashboard-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - dashboard-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dashboard-backend:latest
+    container_name: dashboard-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    networks:
+      - dashboard-network
+
+networks:
+  dashboard-network:
+    driver: bridge 

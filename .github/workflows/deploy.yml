@@ -1,0 +1,30 @@
+name: Deploy to Render
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Render CLI
+        run: curl -s https://cli.render.com/install.sh | bash
+
+      - name: Deploy to Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          render blueprint launch
+
+      - name: Wait for deployments
+        run: sleep 60 # Wait for services to start
+
+      - name: Verify deployments
+        run: |
+          render list services
