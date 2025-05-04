@@ -35,6 +35,35 @@ jobs:
           echo "Found owner ID: $OWNER_ID (Workspace: $OWNER_NAME)"
           echo "owner_id=$OWNER_ID" >> $GITHUB_OUTPUT
 
+      - name: Delete existing services
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          # Get list of services
+          SERVICES=$(curl -s -H "Authorization: Bearer $RENDER_API_KEY" https://api.render.com/v1/services)
+
+          # Extract service IDs for our services
+          BACKEND_ID=$(echo $SERVICES | jq -r '.[] | select(.service.name=="dashboard-backend") | .service.id')
+          FRONTEND_ID=$(echo $SERVICES | jq -r '.[] | select(.service.name=="dashboard-frontend") | .service.id')
+
+          # Delete backend service if it exists
+          if [ ! -z "$BACKEND_ID" ]; then
+            echo "Deleting existing backend service..."
+            curl -s -X DELETE -H "Authorization: Bearer $RENDER_API_KEY" \
+              "https://api.render.com/v1/services/$BACKEND_ID"
+            # Wait for deletion to complete
+            sleep 10
+          fi
+
+          # Delete frontend service if it exists
+          if [ ! -z "$FRONTEND_ID" ]; then
+            echo "Deleting existing frontend service..."
+            curl -s -X DELETE -H "Authorization: Bearer $RENDER_API_KEY" \
+              "https://api.render.com/v1/services/$FRONTEND_ID"
+            # Wait for deletion to complete
+            sleep 10
+          fi
+
       - name: Deploy to Render and verify
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
@@ -98,7 +127,7 @@ jobs:
                 "env": "docker",
                 "dockerCommand": "nginx -g '\''daemon off;'\''",
                 "numInstances": 1,
-                "healthCheckPath": "/",
+                "healthCheckPath": "/health",
                 "envVars": [
                   {
                     "key": "NODE_ENV",
